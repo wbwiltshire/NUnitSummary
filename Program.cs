@@ -11,11 +11,11 @@ namespace NUnitSummary
 {
     public class Program
     {
-        const string Version = "0.9.0";
+        const string Version = "0.9.1";
         public static void Main(string[] args)
         {
             XDocument doc;
-            XElement testFixture;
+            IEnumerable<XElement> testCases;
             string results = String.Empty;
             CommandLineParameters clp = new CommandLineParameters() { Arguments = 0, FileName = String.Empty, Version = false };
 
@@ -25,20 +25,20 @@ namespace NUnitSummary
                 {
                     Console.WriteLine("NUnit Test Summary");
                     doc = XDocument.Load(clp.FileName);
-                    testFixture = doc.XPathSelectElement("descendant::test-suite[@type='TestFixture']");
-                    if (testFixture != null)
+                    testCases = doc.XPathSelectElements("descendant::test-case");
+                    if (testCases != null)
                     {
-                        foreach (XElement element in testFixture.DescendantNodes())
+                        foreach (XElement testCase in testCases)
                         {
-                            Console.Write($"\t{element.Attribute("name").Value} : ");
-                            if (element.Attribute("result").Value.ToUpper() == "PASSED")
+                            Console.Write($"\t{testCase.Attribute("name").Value} : ");
+                            if (testCase.Attribute("result").Value.ToUpper() == "PASSED")
                                 Console.ForegroundColor = ConsoleColor.Green;
                             else
                                 Console.ForegroundColor = ConsoleColor.Red;
 
-                            Console.Write($"{element.Attribute("result").Value}");
+                            Console.Write($"{testCase.Attribute("result").Value}");
                             Console.ResetColor();
-                            Console.WriteLine($", Duration={element.Attribute("duration").Value}(sec)");
+                            Console.WriteLine($", Duration={testCase.Attribute("duration").Value}(sec)");
                         }
                     }
                 }
